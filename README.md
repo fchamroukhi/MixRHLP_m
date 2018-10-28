@@ -4,3 +4,6 @@ Functional data clustering and segmentation codes developed and written by Faice
 The script to run is: script_MixFRHLP.m
 
 The main function is MixFRHLP_EM.m for the EM algorithm (respectively MixFRHLP_CEM.m for the CEM-like algorithm)
+
+
+the references are available on https://chamroukhi.users.lmno.cnrs.fr
