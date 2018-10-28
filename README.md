@@ -5,9 +5,5 @@ The script to run is: script_MixFRHLP.m
 
 The main function is MixFRHLP_EM.m for the EM algorithm (respectively MixFRHLP_CEM.m for the CEM-like algorithm)
 
-<<<<<<< Updated upstream
 
 the references are available on https://chamroukhi.users.lmno.cnrs.fr
-=======
-the references are available on chamroukhi.com
->>>>>>> Stashed changes
