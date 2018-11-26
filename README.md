@@ -7,3 +7,4 @@ The main function is MixFRHLP_EM.m for the EM algorithm (respectively MixFRHLP_C
 
 
 the references are available on https://chamroukhi.users.lmno.cnrs.fr
+
