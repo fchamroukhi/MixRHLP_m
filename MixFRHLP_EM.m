@@ -101,7 +101,7 @@ best_loglik = -inf;
 cputime_total = [];
 while try_EM < total_EM_tries
     try_EM = try_EM +1;
-    fprintf('EM try n� %d\n',try_EM);
+    fprintf('EM try n? %d\n',try_EM);
     time = cputime;    
     
     % % Initialisation 
@@ -140,8 +140,8 @@ while try_EM < total_EM_tries
                     sgk = param.sigma_g(k,g);
                 end                       
                 z=((X-phiBeta*beta_gk).^2)/sgk;
-                log_pijgk_fgk_xij(:,k) = log(pi_jgk(:,k)) - 0.5*(log(2*pi)+log(sgk)) - 0.5*z;%pdf cond à c_i = g et z_i = k de xij
-                %pijgk_fgk_xij(:,k) = pi_jgk(:,k).*normpdf(X,phiBeta*beta_gk,sqrt(sigma_g(k)));%---%pdf cond à c_i = g et z_i = k de xij
+                log_pijgk_fgk_xij(:,k) = log(pi_jgk(:,k)) - 0.5*(log(2*pi)+log(sgk)) - 0.5*z;%pdf cond ?? c_i = g et z_i = k de xij
+                %pijgk_fgk_xij(:,k) = pi_jgk(:,k).*normpdf(X,phiBeta*beta_gk,sqrt(sigma_g(k)));%---%pdf cond ?? c_i = g et z_i = k de xij
             end   
  
             log_pijgk_fgk_xij = min(log_pijgk_fgk_xij,log(realmax));
@@ -213,7 +213,7 @@ while try_EM < total_EM_tries
             param.sigma_g(:,g) = sigma_gk; 
 
             % Maximization w.r.t W 
-            %%  IRLS : Regression logistique multinomiale pondérée par
+            %%  IRLS : Regression logistique multinomiale pond??r??e par
             %%  cluster
             Wg_init = param.Wg(:,:,g);
             

@@ -76,12 +76,12 @@ pi_jgk = zeros(nm,K,G);
 Wg = zeros(q+1,K-1,G);
 if  try_EM ==1
     for g=1:G
-        %Wg(:,:,g) = zeros(q+1,K-1);%initialisation avec le vect null du vercteur param�tre du IRLS
+        %Wg(:,:,g) = zeros(q+1,K-1);%initialisation avec le vect null du vercteur param???tre du IRLS
         pi_jgk(:,:,g) = modele_logit(Wg(:,:,g),phiW);
     end
 else
     for g=1:G
-        Wg(:,:,g) = rand(q+1,K-1);%initialisation aléatoire du vercteur param�tre du IRLS
+        Wg(:,:,g) = rand(q+1,K-1);%initialisation al??atoire du vercteur param???tre du IRLS
         pi_jgk(:,:,g) = modele_logit(Wg(:,:,g),phiW);
     end
 end
@@ -133,7 +133,7 @@ end
             %para.sigmak(k) = var(Xij);
          end
      end
- else % initialisation aléatoire
+ else % initialisation aleatoire
      Lmin= round(m/(K+1));%nbr pts min dans un segments
      tk_init = zeros(1,K+1);
      tk_init(1) = 0;         
@@ -145,6 +145,7 @@ end
          tk_init(k)= temp(ind(1));                      
      end
      tk_init(K+1) = m;
+
      %model.tk_init = tk_init;
      for k=1:K
          i = tk_init(k)+1;
@@ -155,7 +156,7 @@ end
         phi_ij = phi(i:j,:);
         Phi_ij=repmat(phi_ij,n,1);
            
-        bk = inv(Phi_ij'*Phi_ij)*Phi_ij'*Xij; 
+        bk = inv(Phi_ij'*Phi_ij)*Phi_ij'*Xij;
         para.betak(:,k) = bk;
         
          if strcmp(type_variance,'common')
@@ -167,5 +168,6 @@ end
              para.sigmak(k) = sk;
             %para.sigmak(k) = var(Xij);
          end
+
      end
  end

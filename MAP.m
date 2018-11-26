@@ -1,8 +1,8 @@
-function [klas Z] = MAP(post_probas)
+function [klas, Z] = MAP(post_probas)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function [classes Z_MAP] = MAP(post_probas)
 %   
-% calcule une partition d'un echantillon par la regle du Maximum A Posteriori à partir des
+% calcule une partition d'un echantillon par la regle du Maximum A Posteriori ?? partir des
 %
 % probabilites a posteriori 
 %
@@ -23,17 +23,12 @@ function [klas Z] = MAP(post_probas)
 % Sorties : classes : vecteur collones contenant les classe (1:K)
 %
 %       Z : Matrice de dimension [nxK] de la partition dure : ses elements sont zik, avec zik=1 si xi
-%       appartient à la classe k (au sens du MAP) et zero sinon.
+%       appartient a la classe k (au sens du MAP) et zero sinon.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%% Faicel Chamroukhi %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[N K] = size(post_probas);
-[tmp,ikmax] = max(post_probas,[],2);
-partition_MAP = (ikmax*ones(1,K))==(ones(N,1)*[1:K]);
-klas = ones(N,1);
-for k=1:K
-%    ll=find(partition_MAP(:,k)==1);
-%   klas(ll)=k;
-  klas(partition_MAP(:,k)==1)=k;
-end
+[n, K] = size(post_probas);
+[~,klas] = max(post_probas,[],2);
+partition_MAP = (klas*ones(1,K))==(ones(n,1)*[1:K]);
+
 Z = partition_MAP;

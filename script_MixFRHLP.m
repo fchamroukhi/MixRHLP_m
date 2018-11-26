@@ -96,9 +96,9 @@ verbose_IRLS = 0;
 
 [n, m]=size(data);
 
-%solution =  MixFRHLP_EM(data, G , K, p, q, type_variance, init_kmeans, n_tries, max_iter, threshold, verbose, verbose_IRLS);        
+solution =  MixFRHLP_EM(data, G , K, p, q, type_variance, init_kmeans, n_tries, max_iter, threshold, verbose, verbose_IRLS);        
 
-solution =  MixFRHLP_CEM(data, G , K, p, q, type_variance, init_kmeans, n_tries, max_iter, threshold, verbose, verbose_IRLS);        
+%solution =  MixFRHLP_CEM(data, G , K, p, q, type_variance, init_kmeans, n_tries, max_iter, threshold, verbose, verbose_IRLS);        
 
 % bic(K)=solution.BIC;
 % aic(K)=solution.AIC;
