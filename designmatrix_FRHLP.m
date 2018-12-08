@@ -1,38 +1,29 @@
-function [phiBeta, phiW] = designmatrix_FRHLP(t, p, q)
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
+function [XBeta, XW] = designmatrix_FRHLP(x,p,q)
+% function [XBeta, XW] = designmatrix_RHLP(x,p,q)
+% constructs the desing matrix of a polynomial regression with degree p
+% (for the regimes), and with degree q (for the logistic regression)
 %
 %
 % Faicel Chamroukhi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if size(t,1) == 1;
-    t=t'; % en vecteur
-end
-
 if nargin > 2
     ordre_max = max(p,q);
 else
     ordre_max = p;
 end
 
-phi=[];
-for ord = 0:ordre_max
-    phi =[phi, t.^(ord)];% phi2w = [1 t t.^2 t.^3 t.^p;......;...]
+if (size(x,2) ~= 1)
+    x=x'; % a column vector
 end
-phiBeta= phi(:,1:p+1); %matrice de regresseurs pour Beta
+
+X=[];
+for ord = 0:ordre_max
+    X =[X x.^(ord)];% X = [1 t t.^2 t.^3 t.^p;......;...]
+end
+XBeta= X(:,1:p+1); % design matrix for Beta (the polynomial regressions)
 
 if nargin > 2
-   phiW = phi(:,1:q+1);% matrice de regresseurs pour w
+   XW = X(:,1:q+1);% design matrix for w (the logistic regression)
 else
-    phiW =[];
+    XW =[];
 end

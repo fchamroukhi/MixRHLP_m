@@ -1,143 +1,179 @@
-function res = IRLS_MixFRHLP(Gamma,Tau,M,Winit,verbose)
-% res = IRLS(Winit,M,Tau,verbose) : estime le parametre et les pobas d'un processus logistique temporel
-%        dans un contexte multi-classes �tant donn�s une partion et une variable 
-%        explicative, par maximum de vraisembmance (ou MAP)mise en oeuvre par 
-%        l'algorithme Iteratively Reweighted Least Squares. Le modele est le suivant:
-%        probas(i,k) = p(zi=k;W)
-%                    = \pi_{ik}(W)
-%                    =       exp(wk'vi)
-%                      -----------------------
-%                      sum_{l=1}^{K} exp(wl'vi)
-%                                  
-%       avec :
-%            * probas(i,k) est la proba de la classe k au temps t_i :
-%            i=1,...n et k=1,...,K.
-%            * vi = [1,ti,ti^2,...,ti^q]^T;
-%            * q : l'ordre du mod�le logistique
-%       Le paramtere W=[w1,...,wK] (dans l'algo wK est suppose nul);
+function res = IRLS_MixFRHLP(X, Tau, Gamma, Winit, verbose)
 %
-% Entrees :
+% res = IRLS_MixFRHLP(X, Tau, Gamma, Winit, verbose) : an efficient Iteratively Reweighted Least-Squares (IRLS) algorithm for estimating
+% the parameters of a multinomial logistic regression model given the
+% "predictors" X and a partition (hard or smooth) Tau into K>=2 segments,
+% and a cluster weights Gamma (hard or smooth)
+% 
 %
-%         Winit : parametre initial W(0). dim(Winit) = [(q+1)x(K-1)]
-%         M : matrice des variables explicatives.  dim(X) = [nx(q+1)]
-%                            M = [1 t1 t1^2 ... t1^q
+% Inputs :
+%
+%         X : desgin matrix for the logistic weights.  dim(X) = [nx(q+1)]
+%                            X = [1 t1 t1^2 ... t1^q
 %                                 1 t2 t2^2 ... t2^q
 %                                      ..
 %                                 1 ti ti^2 ... ti^q
 %                                      ..
 %                                 1 tn tn^2 ... tn^q]
-%         Tau : matrice de la partion dure ou floue (ici floue : les pro a 
-%           posteiori (tik) obtenus par EM). 
-%         verbose : a mettre � zero si on veut afficher le critere (la
-%         vraisemblance) aucours des iterations de l'algorithme (par defaut
-%         verbose = 0)
+%            q being the number of predictors
+%         Tau : matrix of a hard or fauzzy partition of the data (here for
+%         the RHLP model, Tau is the fuzzy partition represented by the
+%         posterior probabilities (responsibilities) (tik) obtained at the E-Step).
 %
-% Sorties :
+%         Winit : initial parameter values W(0). dim(Winit) = [(q+1)x(K-1)]
+%         verbose : 1 to print the loglikelihood values during the IRLS
+%         iterations, 0 if not
 %
-%          res : structure contenant les resultats. les champs de la
-%          structure sont:
-%              wk : le parametre W. matrice de dim [(q+1)x(K-1)]
-%                  (le dernier etant nul)
-%              piik :les probabilites
-%              loglik : la vraisemblance � la convergence de l'algorithme
-%              LL : vecteur conetant la vraisemblance a chaque iteration de
-%              l'IRLS.
-%              reg_irls : log de la proba a priori de W (pour l'injecter
-%              dans l'EM dans le cas du MAP dans l'IRLS)
+% Outputs :
 %
-%  voir article "Improved learning algorithms for mixture of experts in
-%  multiclass classification" K. Chen, L. Xu & H. Chi. Neural Networks 1999
+%          res : structure containing the fields:
+%              W : the estimated parameter vector. matrix of dim [(q+1)x(K-1)]
+%                  (the last vector being the null vector)
+%              piigk : the logistic probabilities (dim [n x K])
+%              loglik : the value of the maximized objective
+%              LL : stored values of the maximized objective during the
+%              IRLS training
 %
-% Faicel 31 octobre 2008 (mise � jour)
+%        Probs(i,gk) = Pro(segment k|cluster g;W)
+%                    = \pi_{ik}(W)
+%                           exp(wgk'vi)
+%                    =  ---------------------------
+%                      1+sum_{l=1}^{K-1} exp(wgl'vi)
+%
+%       with :
+%            * Probs(i,gk) is the prob of component k at time t_i in
+%            cluster g
+%            i=1,...n,j=1...m,  k=1,...,K,
+%            * vi = [1,ti,ti^2,...,ti^q]^T;
+%       The parameter vecrots are in the matrix W=[w1,...,wK] (with wK is the null vector);
+%
+
+%% References
+% Please cite the following papers for this code:
+%
+%
+% @INPROCEEDINGS{Chamroukhi-IJCNN-2009,
+%   AUTHOR =       {Chamroukhi, F. and Sam\'e,  A. and Govaert, G. and Aknin, P.},
+%   TITLE =        {A regression model with a hidden logistic process for feature extraction from time series},
+%   BOOKTITLE =    {International Joint Conference on Neural Networks (IJCNN)},
+%   YEAR =         {2009},
+%   month = {June},
+%   pages = {489--496},
+%   Address = {Atlanta, GA},
+%  url = {https://chamroukhi.users.lmno.cnrs.fr/papers/chamroukhi_ijcnn2009.pdf}
+% }
+%
+% @article{chamroukhi_et_al_NN2009,
+% 	Address = {Oxford, UK, UK},
+% 	Author = {Chamroukhi, F. and Sam\'{e}, A. and Govaert, G. and Aknin, P.},
+% 	Date-Added = {2014-10-22 20:08:41 +0000},
+% 	Date-Modified = {2014-10-22 20:08:41 +0000},
+% 	Journal = {Neural Networks},
+% 	Number = {5-6},
+% 	Pages = {593--602},
+% 	Publisher = {Elsevier Science Ltd.},
+% 	Title = {Time series modeling by a regression approach based on a latent process},
+% 	Volume = {22},
+% 	Year = {2009},
+% 	url  = {https://chamroukhi.users.lmno.cnrs.fr/papers/Chamroukhi_Neural_Networks_2009.pdf}
+% 	}
+% @article{Chamroukhi-FDA-2018,
+% 	Journal = {},
+% 	Author = {Faicel Chamroukhi and Hien D. Nguyen},
+% 	Volume = {},
+% 	Title = {Model-Based Clustering and Classification of Functional Data},
+% 	Year = {2018},
+% 	eprint ={arXiv:1803.00276v2},
+% 	url =  {https://chamroukhi.users.lmno.cnrs.fr/papers/MBCC-FDA.pdf}
+% 	}
+%
+%
+% Faicel 31 octobre 2008 (mise ??? jour)
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[n,K] = size(Tau);
-[n,q] = size(M);% q ici c'est (q+1)
+[n, K] = size(Tau);
+[n,q] = size(X);% q here is (q+1)
 
-if nargin<4
-   verbose = 0;
-end
-if nargin<3
-   Winit = zeros(q,K-1);
-end
-%load lambda;
-lambda = 1e-9;% cas du MAP ( a priori gaussien sur W) (penalisation L2)
-I = eye(q*(K-1));
+if nargin<5; verbose = 0;end
+if nargin<4; Winit = zeros(q,K-1);end % if there is no a specified initialization
+if nargin<3; Gamma = ones(n,1);end % for standard weighted multinomial logistic regression
+lambda = 1e-9;% if a MAP regularization (a gaussian prior on W) (L_2 penalization); lambda isa positive hyperparameter
 
-%% Initialisation du IRLS (iter = 0)
+I = eye(q*(K-1));% define an identity matrix
+
+%% IRLS Initialization (iter = 0)
 W_old = Winit;
 
-[piik_old loglik_old] = modele_logit_MixFRHLP(W_old,M,Tau,Gamma);
+
+[piik_old, loglik_old] = logit_model_MixFRHLP(W_old, X, Tau, Gamma);
 loglik_old = loglik_old - lambda*(norm(W_old(:),2))^2;
+
 iter = 0;
 converge = 0;
 max_iter = 300;
 LL = [];
-if verbose
-   disp(['IRLS : Iteration ' num2str(iter) ' Log-vraisemblance ' num2str(loglik_old)]);
-end
+
+if verbose; fprintf(1,'IRLS : Iteration : %d "Log-lik": %f\n', iter, loglik_old);end
 %% IRLS
-while ~converge & (iter<max_iter)
-     % Hw_old matrice carree de dimensions hx x hx
-     hx = q*(K-1);
-     Hw_old = zeros(hx,hx);
-     gw_old = zeros(q,K-1,1);
-     
-     % Gradient :
-        for k=1:K-1
+while ~converge && (iter<max_iter)
+    % Hw_old a squared matrix of dimensions  q*(K-1) x  q*(K-1)
+    hx = q*(K-1);
+    Hw_old = zeros(hx,hx);
+    gw_old = zeros(q,K-1,1);
+    
+    % Gradient :
+    for k=1:K-1
             gwk = Gamma.*(Tau(:,k) - piik_old(:,k));
-            for qq=1:q
-            vq = M(:,qq);        
+        for qq=1:q
+            vq = X(:,qq);
             gw_old(qq,k) = gwk'*vq;
-            end
         end
-        gw_old = reshape(gw_old,q*(K-1),1);
-    % Hessienne
+    end
+    gw_old = reshape(gw_old,q*(K-1),1);
+    % Hessian
     for k=1:K-1
         for ell=1:K-1
-            delta_kl =(k==ell);% kronecker delta        
+            delta_kl =(k==ell);% kronecker delta
             gwk = Gamma.*(piik_old(:,k).*(ones(n,1)*delta_kl - piik_old(:,ell)));   
             Hkl = zeros(q,q);
-            for qqa=1:q            
-                vqa=M(:,qqa);               
+            for qqa=1:q
+                vqa=X(:,qqa);
                 for qqb=1:q
-                    vqb=M(:,qqb);  
+                    vqb=X(:,qqb);
                     hwk = vqb'*(gwk.*vqa);
                     Hkl(qqa,qqb) = hwk;
-                 end
-            end         
-              Hw_old((k-1)*q +1 : k*q, (ell-1)*q +1 : ell*q) = -Hkl;
-        end      
+                end
+            end
+            Hw_old((k-1)*q +1 : k*q, (ell-1)*q +1 : ell*q) = -Hkl;
+        end
     end
-
-
-%% si a priori gaussien sur W (lambda ~ 1e-9)
-Hw_old = Hw_old + lambda*I;
-gw_old = gw_old - lambda*W_old(:);
-%% Newton Raphson : W(c+1) = W(c) - H(W(c))^(-1)g(W(c))
-w = W_old(:) - inv(Hw_old)*gw_old ;%[(q+1)x(K-1),1]
-W = reshape(w,q,K-1);%[(q+1)*(K-1)] 
-% mise a jour des probas et de la loglik
-[piik loglik] = modele_logit_MixFRHLP(W, M, Tau ,Gamma);
+    %% if a gaussien prior on W (lambda ~=0)
+    Hw_old = Hw_old + lambda*I;
+    gw_old = gw_old - lambda*W_old(:);
+    %% Newton Raphson : W(t+1) = W(t) - H(W(t))^(-1)g(W(t))
+    w = W_old(:) - inv(Hw_old)*gw_old ;%[(q+1)x(K-1),1]
+    W = reshape(w,q,K-1);%[(q+1)*(K-1)]
+    % mise a jour des probas et de la loglik
+    %[piik, loglik] =logit_model_MixFRHLP(W,X,Tau);
+    [piik, loglik] = logit_model_MixFRHLP(W, X, Tau ,Gamma);
 loglik = loglik - lambda*(norm(W(:),2))^2;
-
-%% Verifier si Qw1(w^(c+1),w^(c))> Qw1(w^(c),w^(c)) 
-%(adaptation) de Newton Raphson : W(c+1) = W(c) - pas*H(W)^(-1)*g(W)
- pas = 1; % initialisation pas d'adaptation de l'algo Newton raphson
- alpha = 2;
- %ll = loglik_old;
- while (loglik < loglik_old)
-        pas = pas/alpha; % pas d'adaptation de l'algo Newton raphson
-        %recalcul du parametre W et de la loglik
-        %Hw_old = Hw_old + lambda*I;%-- added on 17 August
-        w = W_old(:) - pas* inv(Hw_old)*gw_old ;
+    
+    %% check if Qw1(w^(t+1),w^(t))> Qw1(w^(t),w^(t))
+    % (adaptive stepsize in case of troubles with stepsize 1) Newton Raphson : W(t+1) = W(t) - stepsize*H(W)^(-1)*g(W)
+    stepsize = 1; % initialisation pas d'adaptation de l'algo Newton raphson
+    alpha = 2;
+    %ll = loglik_old;
+    while (loglik < loglik_old)
+        stepsize = stepsize/alpha; %
+        %recalculate the parameter W and the "loglik"
+        w = W_old(:) - stepsize* inv(Hw_old)*gw_old ;
         W = reshape(w,q,K-1);
-        [piik loglik] = modele_logit_MixFRHLP(W, M, Tau, Gamma); 
+    [piik, loglik] = logit_model_MixFRHLP(W, X, Tau ,Gamma);
         loglik = loglik - lambda*(norm(W(:),2))^2;
- end     
+    end
     converge1 = abs((loglik-loglik_old)/loglik_old) <= 1e-7;
     converge2 = abs(loglik-loglik_old) <= 1e-6;
     
-    converge = converge1| converge2 ; 
+    converge = converge1 | converge2 ;
     
     piik_old = piik;
     W_old = W;
@@ -145,26 +181,28 @@ loglik = loglik - lambda*(norm(W(:),2))^2;
     LL = [LL loglik_old];
     loglik_old = loglik;
     if verbose
-       disp(['IRLS : Iteration ' num2str(iter) ' Log-vraisemblance ' num2str(loglik_old)]);
+        fprintf(1,'IRLS : Iteration : %d "Log-lik": %f\n', iter, loglik_old);
     end
-end % FIn du IRLS
+end % end of IRLS
 
-if converge 
-   if verbose
+if converge
+    if verbose
+        fprintf('\n');
+        fprintf(1,'IRLS : convergence  OK ; nbr of iterations %d \n', iter);
+        fprintf('\n');
+    end
+else
     fprintf('\n');
-    disp(['IRLS : convergence  OK ; nbre d''iterations : ', num2str(iter)]);
-    fprintf('\n'); 
-   end
-   else fprintf('\n');disp(['IRLS : pas de convergence (augmenter le nombre d''iterations >  ' num2str(max_iter) ' )']) ;
+    fprintf('IRLS : doesn''t converged (augment the number of iterations > %d\n', max_iter) ;
 end
 % resultat
-res.wk = W;
+res.W = W;
 res.LL= LL;
 res.loglik = loglik;
 res.piik = piik;
 
-if lambda~=0 % pour l'injection de l'a priori dans le calcul de la  loglik de l'EM dans le cas du MAP
-res.reg_irls = - lambda*(norm(W(:),2))^2;
+if lambda~=0 % calculate the value of the regularization part to calculate the value of the MAP criterion in case of regularization
+    res.reg_irls = - lambda*(norm(W(:),2))^2; % bayesian l2 regularization
 else
     res.reg_irls = 0;
 end

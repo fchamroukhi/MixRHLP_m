@@ -1,4 +1,4 @@
-function afficher_resultats(data,solution)
+function show_MixRHLP_results(data,solution)
 set(0,'defaultaxesfontsize',14);
 [n, m] = size(data);
 % fs = m/100

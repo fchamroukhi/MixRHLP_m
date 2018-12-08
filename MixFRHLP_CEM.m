@@ -97,12 +97,12 @@ best_comp_loglik = -inf;
 cputime_total = [];
 while try_CEM_like < total_CEM_tries
     try_CEM_like = try_CEM_like +1;
-    fprintf('CEM-like try n° %d\n',try_CEM_like);
+    fprintf('CEM-like try n?? %d\n',try_CEM_like);
     time = cputime;    
     
     % % Initialisation 
     
-    param = initialize_MixFRHLP(data,G , K, phiBeta, phiW, variance_type, init_kmeans, try_CEM_like);
+    param = initialize_MixFRHLP_EM(data,G , K, phiBeta, phiW, variance_type, init_kmeans, try_CEM_like);
     %
 
     iter = 0; 
@@ -139,8 +139,8 @@ while try_CEM_like < total_CEM_tries
                     sgk = param.sigma_g(k,g);
                 end                       
                 z=((X-phiBeta*beta_gk).^2)/sgk;
-                log_pijgk_fgk_xij(:,k) = log(pi_jgk(:,k)+eps) - 0.5*(log(2*pi)+log(sgk)) - 0.5*z;%pdf cond à c_i = g et z_i = k de xij
-                %pijgk_fgk_xij(:,k) = pi_jgk(:,k).*normpdf(X,phiBeta*beta_gk,sqrt(sigma_g(k)));%---%pdf cond à c_i = g et z_i = k de xij
+                log_pijgk_fgk_xij(:,k) = log(pi_jgk(:,k)+eps) - 0.5*(log(2*pi)+log(sgk)) - 0.5*z;%pdf cond ?? c_i = g et z_i = k de xij
+                %pijgk_fgk_xij(:,k) = pi_jgk(:,k).*normpdf(X,phiBeta*beta_gk,sqrt(sigma_g(k)));%---%pdf cond ?? c_i = g et z_i = k de xij
             end   
  
             log_pijgk_fgk_xij = min(log_pijgk_fgk_xij,log(realmax));
@@ -169,7 +169,7 @@ while try_CEM_like < total_CEM_tries
         %%%%%%%%%%%
         % C-Step  %
         %%%%%%%%%%% 
-        [klas c_ig] = MAP(h_ig); % c_ig the hard partition of the curves 
+        [klas, c_ig] = MAP(h_ig); % c_ig the hard partition of the curves 
  
          %% Compute the optimized criterion  
          cig_log_alphag_fg_xij = (c_ig).*log_alphag_fg_xij;
@@ -216,7 +216,7 @@ while try_CEM_like < total_CEM_tries
             param.sigma_g(:,g) = sigma_gk; 
 
             % Maximization w.r.t W 
-            %%  IRLS : Regression logistique multinomiale pondérée par
+            %%  IRLS : Regression logistique multinomiale pond??r??e par
             %%  cluster
  
             Wg_init = param.Wg(:,:,g);
@@ -230,13 +230,13 @@ while try_CEM_like < total_CEM_tries
                %else
                 %   total_CEM_retries = total_CEM_tries;
                %end
-                solution =  curve_clustering_MixFRHLP_CEM(data,G , K, p,fs, q, variance_type,...
+                solution =  MixFRHLP_CEM(data, G , K, p, q, variance_type,...
                     init_kmeans, total_CEM_retries, max_iter_CEM_like, threshold, verbose, verbose_IRLS);
                 return;
             end
 
-            res = IRLS(tauijk, phiW(cluster_labels==g,:), Wg_init, verbose_IRLS);
-            param.Wg(:,:,g)=res.wk;
+            res = IRLS(phiW(cluster_labels==g,:), tauijk, Wg_init, verbose_IRLS);
+            param.Wg(:,:,g)=res.W;
             param.pi_jgk(:,:,g) = repmat(res.piik(1:m,:),n,1);
         end
 %         subplot(211),plot(param.pi_jgk(1:m,:,1))
