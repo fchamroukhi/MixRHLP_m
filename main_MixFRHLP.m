@@ -61,7 +61,7 @@
 %     }
 
 
-clear all;
+clear;
 close all;
 clc;
 
@@ -118,7 +118,7 @@ solution =  MixFRHLP_EM(T, Y, G , K, p, q, type_variance, init_kmeans, n_tries, 
 % aic(K)=solution.AIC;
 % icl(K)=solution.ICL1;
 % end
-show_MixRHLP_results(Y,solution)
+show_MixRHLP_results(Y, solution)
 
 
 

@@ -26,8 +26,7 @@ if init_kmeans
     n_tries_kmeans = 20;
     verbose_kmeans = 0;
     
-    res_kmeans = Kmeans_faicel(D,G,n_tries_kmeans, max_iter_kmeans, verbose_kmeans);
-    
+    res_kmeans = myKmeans(D, G, n_tries_kmeans, max_iter_kmeans, verbose_kmeans);
     for g=1:G
         Yg = D(res_kmeans.klas==g ,:); %if kmeans
 
