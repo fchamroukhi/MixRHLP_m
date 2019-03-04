@@ -49,15 +49,15 @@ The script to run is: main_MixFRHLP.m The main function is MixFRHLP_EM.m for the
  	Title = {Model-based functional mixture discriminant analysis with hidden process regression for curve classification},
  	Volume = {112},
  	Year = {2013}
-     }  
+     } 
+      
 @article{Chamroukhi-FDA-2018,
- 	Journal = {Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery},
- 	Author = {Faicel Chamroukhi and Hien D. Nguyen},
- 	Note = {DOI: 10.1002/widm.1298.},
- 	Volume = {},
- 	Title = {Model-Based Clustering and Classification of Functional Data},
- 	Year = {2019},
- 	Month = {to appear},
- 	url =  {https://chamroukhi.com/papers/MBCC-FDA.pdf}
+	Journal = {Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery},
+	Author = {Faicel Chamroukhi and Hien D. Nguyen},
+	Note = {DOI: 10.1002/widm.1298.},
+	Volume = {},
+	Title = {Model-Based Clustering and Classification of Functional Data},
+	Year = {2018},
+	Month = {Dec}
     }
 ```
