@@ -31,15 +31,16 @@
 %     }
 %
 %
+%
 % @article{Chamroukhi-FDA-2018,
-% 	Journal = {},
+% 	Journal = {Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery},
 % 	Author = {Faicel Chamroukhi and Hien D. Nguyen},
+% 	Note = {DOI: 10.1002/widm.1298.},
 % 	Volume = {},
 % 	Title = {Model-Based Clustering and Classification of Functional Data},
 % 	Year = {2018},
-% 	eprint ={arXiv:1803.00276v2},
-% 	url =  {https://chamroukhi.users.lmno.cnrs.fr/papers/MBCC-FDA.pdf}
-% 	}
+% 	Month = {Dec}}
+%
 %
 % @article{Chamroukhi-RHLP-FLDA,
 % 	Author = {Chamroukhi, F. and Sam\'{e}, A. and Govaert, G. and Aknin, P.},
